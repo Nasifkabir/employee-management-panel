@@ -1,72 +1,86 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
 from PIL import Image
 import os
-from sqlalchemy import or_
+from datetime import date
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///employees.db'
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 db = SQLAlchemy(app)
 
+# Employee Model
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
-    mobile = db.Column(db.String(20))
-    date_of_birth = db.Column(db.String(10))
-    photo = db.Column(db.String(100))
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    mobile = db.Column(db.String(15), nullable=False)
+    dob = db.Column(db.Date, nullable=False)
+    photo = db.Column(db.String(200))  # Path to the resized photo
 
-with app.app_context():
-    db.create_all()
+    def __repr__(self):
+        return f"<Employee {self.first_name} {self.last_name}>"
 
-@app.route('/')
-def index():
+# Resize Image Function
+def resize_image(image_path):
+    with Image.open(image_path) as img:
+        img.thumbnail((150, 150))
+        img.save(image_path)
+
+# Routes
+@app.route('/employees', methods=['GET'])
+def get_employees():
+    search = request.args.get('search', '')
+    sort = request.args.get('sort', 'first_name')
     page = request.args.get('page', 1, type=int)
-    search_query = request.args.get('search', '')
+    per_page = request.args.get('per_page', 5, type=int)
 
-    sort_by = request.args.get('sort', 'first_name')
-    sort_order = request.args.get('order', 'asc')
-
-    if search_query:
-        search = f"%{search_query}%"
-        employees = Employee.query.filter(
-            or_(Employee.first_name.like(search), Employee.last_name.like(search), Employee.email.like(search))
-        ).order_by(getattr(Employee, sort_by).asc() if sort_order == 'asc' else getattr(Employee, sort_by).desc()).paginate(page=page, per_page=10)
+    # Sorting and searching logic
+    if sort == 'first_name':
+        employees = Employee.query.filter(Employee.first_name.like(f'%{search}%')).order_by(Employee.first_name).paginate(page, per_page, False)
+    elif sort == 'email':
+        employees = Employee.query.filter(Employee.email.like(f'%{search}%')).order_by(Employee.email).paginate(page, per_page, False)
     else:
-        employees = Employee.query.order_by(getattr(Employee, sort_by).asc() if sort_order == 'asc' else getattr(Employee, sort_by).desc()).paginate(page=page, per_page=10)
+        employees = Employee.query.paginate(page, per_page, False)
 
-    return render_template('index.html', employees=employees, search_query=search_query, sort_by=sort_by, sort_order=sort_order)
+    return render_template('employee_list.html', employees=employees, search=search, sort=sort)
 
-@app.route('/add', methods=['GET', 'POST'])
+@app.route('/employee/add', methods=['GET', 'POST'])
 def add_employee():
     if request.method == 'POST':
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         email = request.form['email']
         mobile = request.form['mobile']
-        date_of_birth = request.form['date_of_birth']
+        dob = request.form['dob']
         photo = request.files['photo']
+        filename = None
 
         if photo:
-            photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo.filename)
-            photo.save(photo_path)
-            img = Image.open(photo_path)
-            img = img.resize((200, 200))
-            img.save(photo_path)
+            filename = secure_filename(photo.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            photo.save(filepath)
+            resize_image(filepath)
 
-        new_employee = Employee(first_name=first_name, last_name=last_name, email=email, 
-                                mobile=mobile, date_of_birth=date_of_birth, photo=photo.filename)
+        new_employee = Employee(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            mobile=mobile,
+            dob=date.fromisoformat(dob),
+            photo=filename
+        )
         db.session.add(new_employee)
         db.session.commit()
-        flash('Employee added successfully!', 'success')
-        return redirect(url_for('index'))
+        flash("Employee added successfully!")
+        return redirect(url_for('get_employees'))
 
-    return render_template('add.html')
+    return render_template('employee_add.html')
 
-@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/employee/edit/<int:id>', methods=['GET', 'POST'])
 def edit_employee(id):
     employee = Employee.query.get_or_404(id)
     if request.method == 'POST':
@@ -74,31 +88,29 @@ def edit_employee(id):
         employee.last_name = request.form['last_name']
         employee.email = request.form['email']
         employee.mobile = request.form['mobile']
-        employee.date_of_birth = request.form['date_of_birth']
+        employee.dob = date.fromisoformat(request.form['dob'])
 
-        if 'photo' in request.files:
-            photo = request.files['photo']
-            if photo:
-                photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo.filename)
-                photo.save(photo_path)
-                img = Image.open(photo_path)
-                img = img.resize((200, 200))
-                img.save(photo_path)
-                employee.photo = photo.filename
+        photo = request.files['photo']
+        if photo:
+            filename = secure_filename(photo.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            photo.save(filepath)
+            resize_image(filepath)
+            employee.photo = filename
 
         db.session.commit()
-        flash('Employee updated successfully!', 'success')
-        return redirect(url_for('index'))
+        flash("Employee updated successfully!")
+        return redirect(url_for('get_employees'))
 
-    return render_template('edit.html', employee=employee)
+    return render_template('employee_edit.html', employee=employee)
 
-@app.route('/delete/<int:id>', methods=['POST'])
+@app.route('/employee/delete/<int:id>', methods=['POST'])
 def delete_employee(id):
     employee = Employee.query.get_or_404(id)
     db.session.delete(employee)
     db.session.commit()
-    flash('Employee deleted successfully!', 'success')
-    return redirect(url_for('index'))
+    flash("Employee deleted successfully!")
+    return redirect(url_for('get_employees'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>{{ 'Edit' if employee else 'Add' }} Employee</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.css">
+</head>
+<body class="bg-gray-100">
+
+    <div class="container mx-auto my-8 p-4">
+        <h1 class="text-3xl font-bold mb-6">{{ 'Edit' if employee else 'Add' }} Employee</h1>
+
+        <!-- Form for adding or editing an employee -->
+        <form action="{{ url_for('add_employee') if not employee else url_for('edit_employee', id=employee.id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label for="first_name" class="block text-gray-700">First Name:</label>
+                <input type="text" id="first_name" name="first_name" value="{{ employee.first_name if employee else '' }}" required class="border p-2 w-full rounded-lg">
+            </div>
+            <div>
+                <label for="last_name" class="block text-gray-700">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" value="{{ employee.last_name if employee else '' }}" required class="border p-2 w-full rounded-lg">
+            </div>
+            <div>
+                <label for="email" class="block text-gray-700">Email:</label>
+                <input type="email" id="email" name="email" value="{{ employee.email if employee else '' }}" required class="border p-2 w-full rounded-lg">
+            </div>
+            <div>
+                <label for="mobile" class="block text-gray-700">Mobile:</label>
+                <input type="text" id="mobile" name="mobile" value="{{ employee.mobile if employee else '' }}" required class="border p-2 w-full rounded-lg">
+            </div>
+            <div>
+                <label for="date_of_birth" class="block text-gray-700">Date of Birth:</label>
+                <input type="text" id="date_of_birth" name="date_of_birth" value="{{ employee.date_of_birth if employee else '' }}" class="border p-2 w-full rounded-lg flatpickr">
+            </div>
+            <div>
+                <label for="photo" class="block text-gray-700">Photo:</label>
+                <input type="file" id="photo" name="photo" class="border p-2 w-full rounded-lg">
+            </div>
+            <button type="submit" class="bg-blue-500 text-white p-3 rounded-lg">Save Employee</button>
+        </form>
+    </div>
+
+    <!-- Flatpickr for date picker functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"></script>
+    <script>
+        flatpickr(".flatpickr", {
+            dateFormat: "Y-m-d",
+        });
+    </script>
+</body>
+</html>

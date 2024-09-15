@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto py-10">
+        <h1 class="text-4xl font-bold mb-5">Edit Employee</h1>
+
+        <form action="{{ url_for('edit_employee', id=employee.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="first_name" class="block text-lg">First Name:</label>
+                <input type="text" name="first_name" id="first_name" class="w-full p-2 border" value="{{ employee.first_name }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="last_name" class="block text-lg">Last Name:</label>
+                <input type="text" name="last_name" id="last_name" class="w-full p-2 border" value="{{ employee.last_name }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="email" class="block text-lg">Email:</label>
+                <input type="email" name="email" id="email" class="w-full p-2 border" value="{{ employee.email }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="mobile" class="block text-lg">Mobile:</label>
+                <input type="text" name="mobile" id="mobile" class="w-full p-2 border" value="{{ employee.mobile }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="date_of_birth" class="block text-lg">Date of Birth:</label>
+                <input type="date" name="date_of_birth" id="date_of_birth" class="w-full p-2 border" value="{{ employee.date_of_birth }}" required>
+            </div>
+            <div class="mb-4">
+                <label for="photo" class="block text-lg">Upload New Photo:</label>
+                <input type="file" name="photo" id="photo" class="w-full p-2 border">
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update Employee</button>
+        </form>
+    </div>
+</body>
+</html>

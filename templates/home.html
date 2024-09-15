@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <style>
+        .hero {
+            color: #fff;
+        }
+        .hero-content {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 60px;
+            text-align: center;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="hero h-96 flex items-center justify-center">
+        <div class="hero-content">
+            <h1 class="text-5xl font-bold mb-4">Welcome to the Employee Management System</h1>
+            <p class="text-lg mb-6">Manage your employees efficiently with our easy-to-use system.</p>
+            <a href="{{ url_for('index') }}" class="bg-blue-500 text-white px-6 py-3 rounded-lg text-lg">View Employees</a>
+            <a href="{{ url_for('add_employee') }}" class="bg-green-500 text-white px-6 py-3 rounded-lg text-lg ml-4">Add Employee</a>
+        </div>
+    </header>
+    
+    <main class="py-10">
+        <div class="container mx-auto px-4">
+            <section class="text-center mb-10">
+                <h2 class="text-3xl font-bold mb-4">Features</h2>
+                <p class="text-lg mb-6">Our system offers the following features to streamline employee management:</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-2">Employee List</h3>
+                        <p>View and manage the list of employees with ease. Sort, search, and paginate through employee data.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-2">Add New Employee</h3>
+                        <p>Add new employees to the system quickly and easily, complete with profile photos and personal details.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-semibold mb-2">Edit Employee Details</h3>
+                        <p>Edit existing employee information, update details, and manage photos with a user-friendly interface.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 Employee Management System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -7,6 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///employees.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit upload size to 16 MB
 db = SQLAlchemy(app)
 
 class Employee(db.Model):
@@ -22,9 +23,29 @@ with app.app_context():
     db.create_all()
 
 @app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/index')
 def index():
-    employees = Employee.query.all()
-    return render_template('index.html', employees=employees)
+    # Default items per page
+    items_per_page = 5
+    # Get the current page number from query parameters, default is 1
+    page = request.args.get('page', 1, type=int)
+    
+    # Calculate the offset and limit
+    offset = (page - 1) * items_per_page
+    employees_query = Employee.query.order_by(Employee.id).offset(offset).limit(items_per_page)
+    
+    employees = employees_query.all()
+    
+    # Get total number of employees
+    total_employees = Employee.query.count()
+    
+    # Calculate total pages
+    total_pages = (total_employees + items_per_page - 1) // items_per_page
+    
+    return render_template('index.html', employees=employees, page=page, total_pages=total_pages)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_employee():
@@ -35,7 +56,7 @@ def add_employee():
         mobile = request.form['mobile']
         date_of_birth = request.form['date_of_birth']
 
-        photo = request.files['photo']
+        photo = request.files.get('photo')
         if photo:
             photo_filename = photo.filename
             photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename)
@@ -59,6 +80,7 @@ def add_employee():
         db.session.add(new_employee)
         db.session.commit()
 
+        flash('Employee added successfully!', 'success')
         return redirect(url_for('index'))
     
     return render_template('add.html')
@@ -73,22 +95,22 @@ def edit_employee(id):
         employee.mobile = request.form['mobile']
         employee.date_of_birth = request.form['date_of_birth']
 
-        if 'photo' in request.files:
-            photo = request.files['photo']
-            if photo:
-                photo_filename = photo.filename
-                photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename)
-                photo.save(photo_path)
+        photo = request.files.get('photo')
+        if photo and photo.filename:
+            photo_filename = photo.filename
+            photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename)
+            photo.save(photo_path)
 
-                # Resize the image
-                image = Image.open(photo_path)
-                image = image.resize((150, 150))
-                image.save(photo_path)
+            # Resize the image
+            image = Image.open(photo_path)
+            image = image.resize((150, 150))
+            image.save(photo_path)
 
-                employee.photo = photo_filename
+            employee.photo = photo_filename
 
         db.session.commit()
 
+        flash('Employee details updated successfully!', 'success')
         return redirect(url_for('index'))
     
     return render_template('edit.html', employee=employee)
@@ -99,7 +121,12 @@ def delete_employee(id):
     db.session.delete(employee)
     db.session.commit()
 
+    flash('Employee deleted successfully!', 'success')
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
+    # Ensure the upload folder exists
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+
     app.run(debug=True)

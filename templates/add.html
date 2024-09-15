@@ -3,43 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <title>Add/Edit Employee</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.css">
+    <title>Add Employee</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .form-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-header {
+            background: #4a90e2;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+            padding: 16px;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-
-    <div class="container mx-auto my-8 p-4">
-        <h1 class="text-3xl font-bold mb-6">{{ 'Edit' if employee else 'Add' }} Employee</h1>
-
-        <!-- add.html -->
-<form action="{{ url_for('add_employee') }}" method="POST" enctype="multipart/form-data">
-    <label for="first_name">First Name:</label>
-    <input type="text" name="first_name" required>
-    
-    <label for="last_name">Last Name:</label>
-    <input type="text" name="last_name" required>
-    
-    <label for="email">Email:</label>
-    <input type="email" name="email" required>
-    
-    <label for="mobile">Mobile:</label>
-    <input type="text" name="mobile" required>
-    
-    <label for="date_of_birth">Date of Birth:</label>
-    <input type="date" name="date_of_birth" required>
-    
-    <label for="photo">Upload Photo:</label>
-    <input type="file" name="photo">
-    
-    <button type="submit">Add Employee</button>
-</form>
-
+<body class="bg-gray-200">
+    <div class="container mx-auto py-10">
+        <div class="form-container max-w-lg mx-auto">
+            <div class="form-header text-center">
+                <h1 class="text-3xl font-semibold">Add New Employee</h1>
+            </div>
+            <div class="text-center mt-6">
+                <a href="{{ url_for('home') }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Home</a>
+            </div>
+            <form action="{{ url_for('add_employee') }}" method="POST" enctype="multipart/form-data" class="p-8">
+                <div class="mb-6">
+                    <label for="first_name" class="block text-lg font-medium text-gray-700">First Name:</label>
+                    <input type="text" name="first_name" id="first_name" class="mt-1 block w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="last_name" class="block text-lg font-medium text-gray-700">Last Name:</label>
+                    <input type="text" name="last_name" id="last_name" class="mt-1 block w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="email" class="block text-lg font-medium text-gray-700">Email:</label>
+                    <input type="email" name="email" id="email" class="mt-1 block w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="mobile" class="block text-lg font-medium text-gray-700">Mobile:</label>
+                    <input type="text" name="mobile" id="mobile" class="mt-1 block w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="date_of_birth" class="block text-lg font-medium text-gray-700">Date of Birth:</label>
+                    <input type="text" name="date_of_birth" id="date_of_birth" class="mt-1 block w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="photo" class="block text-lg font-medium text-gray-700">Photo:</label>
+                    <input type="file" name="photo" id="photo" class="mt-1 block w-full p-3 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
+            </form>
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        flatpickr(".flatpickr", {
+        flatpickr("#date_of_birth", {
             dateFormat: "Y-m-d",
         });
     </script>
